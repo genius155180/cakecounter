@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет ящиков для тортов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #FF6347;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+        }
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s ease;
+        }
+        input[type="number"]:focus, input[type="text"]:focus {
+            border-color: #FF6347;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #FF4500;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #eaf0f3;
+            border-radius: 10px;
+            border: 1px solid #ccd1d1;
+            font-size: 16px;
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            line-height: 1.5;
+            transition: transform 0.3s ease;
+        }
+        .result h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #FF6347;
+        }
+        .result p {
+            margin: 10px 0;
+        }
+        .result:hover {
+            transform: scale(1.02);
+        }
+        .additional-cake {
+            margin-top: 20px;
+        }
+        .cake-form-group {
+            margin-bottom: 10px;
+        }
+        .history {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            border: 1px solid #ccd1d1;
+            font-size: 16px;
+            color: #333;
+        }
+        .history h3 {
+            font-size: 18px;
+            color: #FF6347;
+            margin-bottom: 10px;
+        }
+        .history ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .history ul li {
+            background-color: #f4f4f4;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Расчет ящиков для тортов</h1>
+
+    <div class="container">
+        <!-- Основные формы для ввода количества тортов -->
+        <div class="form-group">
+            <label for="orange-cake">Количество тортов "Апельсин с киви"</label>
+            <input type="number" id="orange-cake" min="0" placeholder="Введите количество">
+        </div>
+
+        <div class="form-group">
+            <label for="watermelon-cake">Количество тортов "Часточка кавуна"</label>
+            <input type="number" id="watermelon-cake" min="0" placeholder="Введите количество">
+        </div>
+
+        <div class="form-group">
+            <label for="red-velvet-cake">Количество тортов "Червоний оксамит"</label>
+            <input type="number" id="red-velvet-cake" min="0" placeholder="Введите количество">
+        </div>
+
+        <div class="form-group">
+            <label for="chocolate-cake">Количество тортов "Шоколадний з банановим кремом"</label>
+            <input type="number" id="chocolate-cake" min="0" placeholder="Введите количество">
+        </div>
+
+        <button onclick="calculateBoxes()">Рассчитать</button>
+
+        <!-- Кнопка для добавления нового вида торта -->
+        <button onclick="addNewCakeForm()">Добавить новый вид торта</button>
+
+        <!-- Кнопка для просмотра истории расчетов -->
+        <button onclick="showHistory()">Посмотреть историю расчетов</button>
+
+        <!-- Поле для вывода результата -->
+        <div class="result" id="result" style="display: none;">
+            <h3>Результаты расчета:</h3>
+            <div id="result-details"></div>
+        </div>
+
+        <!-- Блок для ввода данных нового торта -->
+        <div id="additional-cakes-container" class="additional-cake"></div>
+
+        <!-- История расчетов -->
+        <div id="history-container" class="history" style="display: none;">
+            <h3>История расчетов:</h3>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        const cakesData = {
+            "orangeCake": { name: "Апельсин с киви", boxCapacity: 4 },
+            "watermelonCake": { name: "Часточка кавуна", boxCapacity: 8 },
+            "redVelvetCake": { name: "Червоний оксамит", boxCapacity: 6 },
+            "chocolateCake": { name: "Шоколадний з банановим кремом", boxCapacity: 6 }
+        };
+
+        const history = [];
+
+        // Функция для добавления нового торта
+        function addNewCakeForm() {
+            const container = document.getElementById("additional-cakes-container");
+
+            const newCakeForm = document.createElement("div");
+            newCakeForm.classList.add("cake-form-group");
+
+            const cakeNameInput = document.createElement("input");
+            cakeNameInput.type = "text";
+            cakeNameInput.placeholder = "Название нового торта";
+
+            const boxCapacityInput = document.createElement("input");
+            boxCapacityInput.type = "number";
+            boxCapacityInput.placeholder = "Сколько тортов влазит в ящик";
+
+            const cakeQuantityInput = document.createElement("input");
+            cakeQuantityInput.type = "number";
+            cakeQuantityInput.placeholder = "Количество новых тортов";
+
+            newCakeForm.appendChild(cakeNameInput);
+            newCakeForm.appendChild(boxCapacityInput);
+            newCakeForm.appendChild(cakeQuantityInput);
+
+            container.appendChild(newCakeForm);
+        }
+
+        // Функция для расчета ящиков
+        function calculateBoxes() {
+            const result = [];
+            const inputs = [
+                { id: 'orange-cake', name: 'Апельсин с киви', boxCapacity: 4 },
+                { id: 'watermelon-cake', name: 'Часточка кавуна', boxCapacity: 8 },
+                { id: 'red-velvet-cake', name: 'Червоний оксамит', boxCapacity: 6 },
+                { id: 'chocolate-cake', name: 'Шоколадний з банановим кремом', boxCapacity: 6 }
+            ];
+
+            const additionalCakes = document.getElementById('additional-cakes-container').children;
+            for (const form of additionalCakes) {
+                const name = form.children[0].value;
+                const boxCapacity = parseInt(form.children[1].value);
+                const quantity = parseInt(form.children[2].value);
+
+                if (name && boxCapacity > 0 && quantity > 0) {
+                    inputs.push({ name, boxCapacity, quantity });
+                }
+            }
+
+            inputs.forEach(input => {
+                const tortCount = parseInt(document.getElementById(input.id)?.value) || input.quantity || 0;
+                const fullBoxes = Math.floor(tortCount / input.boxCapacity);
+                const remaining = tortCount % input.boxCapacity;
+
+                result.push(`${input.name}: ${fullBoxes} полных ящиков и ${remaining} штук отдельно`);
+            });
+
+            const resultContainer = document.getElementById('result');
+            const resultDetails = document.getElementById('result-details');
+            resultDetails.innerHTML = result.join('<br>');
+            resultContainer.style.display = 'block';
+
+            // Сохраняем результат в историю
+            history.push(result.join('<br>'));
+        }
+
+        // Функция для отображения истории расчетов
+        function showHistory() {
+            const historyContainer = document.getElementById('history-container');
+            const historyList = document.getElementById('history-list');
+
+            historyList.innerHTML = ''; // Очищаем список перед выводом
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<li>История расчетов пуста</li>';
+            } else {
+                history.forEach((entry, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `Расчет ${index + 1}:<br>${entry}`;
+                    historyList.appendChild(listItem);
+                });
+            }
+
+            historyContainer.style.display = 'block';
+        }
+    </script>
+
+</body>
+</html>
